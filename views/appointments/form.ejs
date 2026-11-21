@@ -1,0 +1,52 @@
+<%- include('../partials/head') %>
+<%- include('../partials/nav') %>
+<div class="container pb-5" style="max-width: 800px;">
+  <div class="mb-3">
+    <a href="/appointments" class="btn btn-link px-0">&larr; Uchrashuvlar ro‘yxati</a>
+    <h1 class="h3"><%= title %></h1>
+  </div>
+  <% if (error) { %><div class="alert alert-danger"><%= error %></div><% } %>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <% if (!patients || patients.length === 0) { %>
+        <div class="alert alert-warning mb-0">Uchrashuv yaratish uchun avval bemor qo‘shing. <a href="/patients/new">Yangi bemor</a></div>
+      <% } else { %>
+      <form action="<%= action %>" method="POST" class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Bemor (patient_id)</label>
+          <select name="patient_id" class="form-select" required>
+            <option value="">Tanlang</option>
+            <% patients.forEach((p) => { %>
+              <option value="<%= p.id %>" <%= String(selectedPatientId || (appointment && appointment.patient_id) || '') === String(p.id) ? 'selected' : '' %>>
+                <%= p.name %> (age: <%= p.age %>)
+              </option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Shifokor nomi (doctor_name)</label>
+          <input type="text" name="doctor_name" class="form-control" required value="<%= appointment ? (appointment.doctor_name || '') : '' %>">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Uchrashuv sanasi (appointment_date)</label>
+          <input type="date" name="appointment_date" class="form-control" required value="<%= appointment ? (appointment.appointment_date || '') : '' %>">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Status</label>
+          <select name="status" class="form-select">
+            <% statuses.forEach((s) => { %>
+              <option value="<%= s %>" <%= (appointment && appointment.status === s) || (!appointment && s === 'scheduled') ? 'selected' : '' %>><%= s %></option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="col-12 d-flex gap-2">
+          <button type="submit" class="btn btn-primary">Saqlash</button>
+          <a href="/appointments" class="btn btn-secondary">Bekor qilish</a>
+        </div>
+      </form>
+      <% } %>
+    </div>
+  </div>
+</div>
+<%- include('../partials/footer') %>

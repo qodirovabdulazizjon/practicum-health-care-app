@@ -19,7 +19,8 @@ export default (sequelize, Sequelize) => {
     },
     medical_history: {
       type: Sequelize.TEXT,
-      allowNull: true,
+      allowNull: false,
+      defaultValue: 'none',
     },
     contact_info: {
       type: Sequelize.JSON,

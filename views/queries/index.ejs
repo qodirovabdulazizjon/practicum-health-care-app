@@ -1,0 +1,148 @@
+<%- include('../partials/head') %>
+<%- include('../partials/nav') %>
+<div class="container pb-5">
+  <div class="mb-4">
+    <h1 class="h3 mb-1">Murakkab so‘rovlar</h1>
+    <p class="text-muted mb-0">WHERE shartlari asosidagi so‘rovlar natijalari</p>
+  </div>
+
+  <% if (error) { %><div class="alert alert-danger"><%= error %></div><% } %>
+
+  <div class="row g-4">
+    <div class="col-lg-6">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <h2 class="h5">1. Sana oralig‘idagi uchrashuvlari bor bemorlar</h2>
+          <p class="small text-muted">Ikki sana orasida uchrashuvlari bo‘lgan bemorlar.</p>
+          <form action="/queries/patients-by-date-range" method="GET" class="row g-2">
+            <div class="col-md-5">
+              <label class="form-label">Boshlanish (from)</label>
+              <input type="date" name="from" class="form-control" required value="<%= (params && params.from) || '' %>">
+            </div>
+            <div class="col-md-5">
+              <label class="form-label">Tugash (to)</label>
+              <input type="date" name="to" class="form-control" required value="<%= (params && params.to) || '' %>">
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+              <button class="btn btn-primary w-100" type="submit">Qidirish</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <h2 class="h5">2. Muayyan tibbiy holati bor bemorlar</h2>
+          <p class="small text-muted">medical_history ichida ko‘rsatilgan holat bo‘yicha qidirish.</p>
+          <form action="/queries/patients-by-condition" method="GET" class="row g-2">
+            <div class="col-md-10">
+              <label class="form-label">Tibbiy holat</label>
+              <select name="condition" class="form-select" required>
+                <option value="">Tanlang</option>
+                <% conditions.forEach((c) => { %>
+                  <option value="<%= c %>" <%= (params && params.condition === c) ? 'selected' : '' %>><%= c %></option>
+                <% }) %>
+              </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+              <button class="btn btn-primary w-100" type="submit">Qidirish</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <h2 class="h5">3. Muayyan shifokor uchrashuvlari</h2>
+          <p class="small text-muted">Tanlangan yoki kiritilgan shifokor bo‘yicha barcha uchrashuvlar.</p>
+          <form action="/queries/appointments-by-doctor" method="GET" class="row g-2">
+            <div class="col-md-10">
+              <label class="form-label">Shifokor nomi (doctor_name)</label>
+              <input list="doctor-list" type="text" name="doctor_name" class="form-control" required value="<%= (params && params.doctor_name) || '' %>" placeholder="Masalan: Dr. Smith">
+              <datalist id="doctor-list">
+                <% doctors.forEach((d) => { %><option value="<%= d %>"></option><% }) %>
+              </datalist>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+              <button class="btn btn-primary w-100" type="submit">Qidirish</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <h2 class="h5">4. Maʼlum davrda uchrashuvi bo‘lmagan bemorlar</h2>
+          <p class="small text-muted">So‘nggi N oy ichida hech qanday uchrashuvi bo‘lmagan bemorlar (masalan 6 oy).</p>
+          <form action="/queries/patients-without-recent-appointments" method="GET" class="row g-2">
+            <div class="col-md-10">
+              <label class="form-label">Oylar soni</label>
+              <input type="number" min="1" name="months" class="form-control" required value="<%= (params && params.months) || 6 %>">
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+              <button class="btn btn-primary w-100" type="submit">Qidirish</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <% if (results) { %>
+    <div class="card shadow-sm mt-4">
+      <div class="card-body">
+        <h2 class="h5 mb-3">Natijalar
+          <% if (queryType === 'date-range') { %>— sana oralig‘i: <%= params.from %> dan <%= params.to %> gacha<% } %>
+          <% if (queryType === 'condition') { %>— holat: <%= params.condition %><% } %>
+          <% if (queryType === 'doctor') { %>— shifokor: <%= params.doctor_name %><% } %>
+          <% if (queryType === 'inactive') { %>— oxirgi <%= params.months %> oy ichida uchrashuv yo‘q (boshlanish: <%= results.since %>)<% } %>
+        </h2>
+
+        <% if (!results.items || results.items.length === 0) { %>
+          <div class="alert alert-info mb-0">Natija topilmadi.</div>
+        <% } else if (results.type === 'appointments') { %>
+          <div class="table-responsive">
+            <table class="table table-bordered table-striped align-middle">
+              <thead><tr><th>Sana</th><th>Bemor</th><th>Shifokor</th><th>Status</th></tr></thead>
+              <tbody>
+                <% results.items.forEach((a) => { %>
+                  <tr>
+                    <td><%= a.appointment_date %></td>
+                    <td><%= a.patient ? a.patient.name : a.patient_id %></td>
+                    <td><%= a.doctor_name %></td>
+                    <td><span class="badge text-bg-secondary"><%= a.status %></span></td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        <% } else { %>
+          <div class="table-responsive">
+            <table class="table table-bordered table-striped align-middle">
+              <thead><tr><th>Ism</th><th>Yosh</th><th>Tibbiy tarix</th><th>Telefon</th><th>Email</th><th>Manzil</th></tr></thead>
+              <tbody>
+                <% results.items.forEach((p) => { const c = p.contact_info || {}; %>
+                  <tr>
+                    <td><%= p.name %></td>
+                    <td><%= p.age %></td>
+                    <td><%= p.medical_history %></td>
+                    <td><%= c.phone || '-' %></td>
+                    <td><%= c.email || '-' %></td>
+                    <td><%= c.address || '-' %></td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  <% } %>
+</div>
+<%- include('../partials/footer') %>

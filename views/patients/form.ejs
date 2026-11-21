@@ -1,0 +1,67 @@
+<%- include('../partials/head') %>
+<%- include('../partials/nav') %>
+<div class="container pb-5" style="max-width: 900px;">
+  <div class="mb-3">
+    <a href="/patients" class="btn btn-link px-0">&larr; Bemorlar ro‘yxati</a>
+    <h1 class="h3"><%= title %></h1>
+  </div>
+
+  <% if (error) { %>
+    <div class="alert alert-danger"><%= error %></div>
+  <% } %>
+
+  <% const c = (patient && patient.contact_info) ? patient.contact_info : {}; %>
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <form action="<%= action %>" method="POST" class="row g-3">
+        <div class="col-md-8">
+          <label class="form-label">Ism (name)</label>
+          <input type="text" name="name" class="form-control" required value="<%= patient ? (patient.name || '') : '' %>">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Yosh (age)</label>
+          <input type="number" name="age" min="0" class="form-control" required value="<%= patient ? (patient.age ?? '') : '' %>">
+        </div>
+        <div class="col-12">
+          <label class="form-label">Tibbiy tarix (medical_history)</label>
+          <textarea name="medical_history" class="form-control" rows="3" placeholder="Masalan: Diabetes, Hypertension"><%= patient ? (patient.medical_history || '') : 'none' %></textarea>
+          <div class="form-text">Mavjud holatlar: diabetes, hypertension, asthma, heart_disease, none</div>
+        </div>
+
+        <div class="col-12"><hr class="my-1"><h2 class="h5 mb-0">Aloqa maʼlumotlari (contact_info)</h2></div>
+        <div class="col-md-4">
+          <label class="form-label">Telefon (phone)</label>
+          <input type="text" name="phone" class="form-control" value="<%= c.phone || '' %>">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Email</label>
+          <input type="email" name="email" class="form-control" value="<%= c.email || '' %>">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Manzil (address)</label>
+          <input type="text" name="address" class="form-control" value="<%= c.address || '' %>">
+        </div>
+
+        <div class="col-12 d-flex gap-2">
+          <button type="submit" class="btn btn-primary">Saqlash</button>
+          <a href="/patients" class="btn btn-secondary">Bekor qilish</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="mt-4">
+    <h2 class="h6">JSON namunasi (spec)</h2>
+    <pre class="bg-white border rounded p-3 small mb-0">{
+  "name": "John Doe",
+  "age": 45,
+  "medical_history": "Diabetes, Hypertension",
+  "contact_info": {
+    "phone": "123-456-7890",
+    "email": "john.doe@example.com",
+    "address": "123 Main St, Anytown, USA"
+  }
+}</pre>
+  </div>
+</div>
+<%- include('../partials/footer') %>

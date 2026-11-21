@@ -1,0 +1,69 @@
+<%- include('../partials/head') %>
+<%- include('../partials/nav') %>
+<div class="container pb-5">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h1 class="h3 mb-1">Bemorlar</h1>
+      <p class="text-muted mb-0">Bemor yozuvlarini boshqarish</p>
+    </div>
+    <a href="/patients/new" class="btn btn-primary">Yangi bemor qo‘shish</a>
+  </div>
+
+  <% if (message) { %>
+    <div class="alert alert-success"><%= message %></div>
+  <% } %>
+  <% if (error) { %>
+    <div class="alert alert-danger"><%= error %></div>
+  <% } %>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <% if (!patients || patients.length === 0) { %>
+        <p class="mb-0">Hozircha bemorlar yo‘q.</p>
+      <% } else { %>
+        <div class="table-responsive">
+          <table class="table table-striped align-middle">
+            <thead>
+              <tr>
+                <th>Ism</th>
+                <th>Yosh</th>
+                <th>Tibbiy tarix</th>
+                <th>Aloqa maʼlumotlari</th>
+                <th>Uchrashuvlar</th>
+                <th>Amallar</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% patients.forEach((p) => { 
+                   const c = p.contact_info || {};
+                   const appts = p.appointments || [];
+              %>
+                <tr>
+                  <td><strong><%= p.name %></strong><div class="small text-muted">ID: <%= p.id %></div></td>
+                  <td><%= p.age %></td>
+                  <td style="min-width: 220px;"><%= p.medical_history %></td>
+                  <td style="min-width: 220px;">
+                    <div><strong>Telefon:</strong> <%= c.phone || '-' %></div>
+                    <div><strong>Email:</strong> <%= c.email || '-' %></div>
+                    <div><strong>Manzil:</strong> <%= c.address || '-' %></div>
+                  </td>
+                  <td><span class="badge text-bg-info"><%= appts.length %></span></td>
+                  <td style="min-width: 240px;">
+                    <div class="d-flex flex-wrap gap-2">
+                      <a href="/appointments/new?patient_id=<%= p.id %>" class="btn btn-sm btn-outline-success">Uchrashuv</a>
+                      <a href="/patients/<%= p.id %>/edit" class="btn btn-sm btn-outline-primary">Tahrirlash</a>
+                      <form action="/patients/<%= p.id %>/delete" method="POST" onsubmit="return confirm('Bemorni o‘chirishni tasdiqlaysizmi? Uchrashuvlar ham o‘chadi.');">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">O‘chirish</button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>
+<%- include('../partials/footer') %>

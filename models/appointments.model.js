@@ -11,11 +11,11 @@ export default (sequelize, Sequelize) => {
       allowNull: false,
     },
     appointment_date: {
-      type: Sequelize.DATE,
+      type: Sequelize.DATEONLY,
       allowNull: false,
     },
     status: {
-      type: Sequelize.ENUM('scheduled', 'completed', 'cancelled'),
+      type: Sequelize.ENUM('scheduled', 'completed', 'canceled'),
       allowNull: false,
       defaultValue: 'scheduled',
     },
